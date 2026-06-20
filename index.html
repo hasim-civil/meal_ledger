@@ -166,6 +166,47 @@
   .auth-switch { text-align: center; font-size: 0.82rem; color: var(--ink-soft); margin-top: 14px; }
   .auth-switch a { color: var(--blue); font-weight: 600; cursor: pointer; text-decoration: none; }
 
+  .auth-extras {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: -2px 0 6px;
+  }
+
+  .remember-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .remember-row input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--blue);
+    cursor: pointer;
+  }
+
+  .forgot-link {
+    font-size: 0.8rem;
+    color: var(--blue);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .auth-btn-secondary {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--blue-deep);
+    margin-top: 10px;
+  }
+
+  .auth-btn-secondary:disabled { opacity: 0.6; cursor: default; }
+
   .auth-error {
     background: var(--warn-soft);
     border: 1px solid var(--warn-line);
@@ -460,12 +501,32 @@
         <label>Email</label>
         <input type="email" id="authEmail" placeholder="you@example.com" autocomplete="email">
       </div>
-      <div class="auth-field">
+      <div class="auth-field" id="authPasswordField">
         <label>Password</label>
         <input type="password" id="authPassword" placeholder="At least 6 characters" autocomplete="current-password">
       </div>
+      <div class="auth-extras" id="authExtras">
+        <label class="remember-row">
+          <input type="checkbox" id="rememberMe" checked>
+          <span>Remember me</span>
+        </label>
+        <a class="forgot-link" id="forgotLink">Forgot password?</a>
+      </div>
       <button class="auth-btn" id="authSubmitBtn">Log in</button>
       <div class="auth-switch" id="authSwitch">Don't have an account? <a id="authSwitchLink">Sign up</a></div>
+    </div>
+  </div>
+
+  <!-- VERIFY EMAIL SCREEN -->
+  <div id="verifyScreen" class="auth-wrap hidden">
+    <div class="auth-card">
+      <h2>Verify your email</h2>
+      <div class="auth-sub">We sent a verification link to <strong id="verifyEmail"></strong>. Open it, then come back here.</div>
+      <div class="auth-error" id="verifyError"></div>
+      <div class="auth-error" id="verifyNotice" style="background:var(--teal-soft); border-color:#bfe6dd; color:#0E6155; display:none;"></div>
+      <button class="auth-btn" id="verifyContinueBtn">I've verified — continue</button>
+      <button class="auth-btn auth-btn-secondary" id="verifyResendBtn">Resend verification email</button>
+      <div class="auth-switch"><a id="verifyLogoutLink">Log out</a></div>
     </div>
   </div>
 
@@ -558,7 +619,9 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-    signOut, onAuthStateChanged
+    signOut, onAuthStateChanged, setPersistence, browserLocalPersistence,
+    browserSessionPersistence, sendEmailVerification, sendPasswordResetEmail,
+    reload
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import {
     getFirestore, collection, doc, setDoc, deleteDoc, addDoc,
@@ -602,7 +665,7 @@
   let currentUser = null;
   let unsubAttendance = null;
   let unsubSpend = null;
-  let authMode = 'login'; // 'login' | 'signup'
+  let authMode = 'login'; // 'login' | 'signup' | 'reset'
 
   const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -646,21 +709,34 @@
     const sub = document.getElementById('authSub');
     const submitBtn = document.getElementById('authSubmitBtn');
     const switchEl = document.getElementById('authSwitch');
+    const passwordField = document.getElementById('authPasswordField');
+    const extras = document.getElementById('authExtras');
     document.getElementById('authError').style.display = 'none';
 
     if (mode === 'login') {
       title.textContent = 'Welcome back';
       sub.textContent = 'Log in to your meal ledger';
       submitBtn.textContent = 'Log in';
+      passwordField.classList.remove('hidden');
+      extras.classList.remove('hidden');
       switchEl.innerHTML = `Don't have an account? <a id="authSwitchLink">Sign up</a>`;
-    } else {
+    } else if (mode === 'signup') {
       title.textContent = 'Create your account';
       sub.textContent = 'Set up your own meal ledger login';
       submitBtn.textContent = 'Sign up';
+      passwordField.classList.remove('hidden');
+      extras.classList.add('hidden');
       switchEl.innerHTML = `Already have an account? <a id="authSwitchLink">Log in</a>`;
+    } else {
+      title.textContent = 'Reset your password';
+      sub.textContent = "Enter your email and we'll send you a reset link";
+      submitBtn.textContent = 'Send reset link';
+      passwordField.classList.add('hidden');
+      extras.classList.add('hidden');
+      switchEl.innerHTML = `<a id="authSwitchLink">Back to log in</a>`;
     }
     document.getElementById('authSwitchLink').addEventListener('click', () => {
-      setAuthMode(mode === 'login' ? 'signup' : 'login');
+      setAuthMode(mode === 'signup' ? 'login' : (mode === 'reset' ? 'login' : 'signup'));
     });
   }
 
@@ -671,6 +747,26 @@
     const submitBtn = document.getElementById('authSubmitBtn');
     errorEl.style.display = 'none';
 
+    if (authMode === 'reset') {
+      if (!email) {
+        errorEl.textContent = 'Please enter your email address.';
+        errorEl.style.display = 'block';
+        return;
+      }
+      submitBtn.disabled = true;
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showStatus('Reset link sent — check your inbox');
+        setAuthMode('login');
+      } catch (err) {
+        errorEl.textContent = AUTH_ERROR_MESSAGES[err.code] || 'Something went wrong. Please try again.';
+        errorEl.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+      }
+      return;
+    }
+
     if (!email || !password) {
       errorEl.textContent = 'Please enter both an email and a password.';
       errorEl.style.display = 'block';
@@ -679,8 +775,12 @@
 
     submitBtn.disabled = true;
     try {
+      const remember = document.getElementById('rememberMe').checked;
+      await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
+
       if (authMode === 'signup') {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        await sendEmailVerification(cred.user);
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
@@ -699,6 +799,68 @@
     document.getElementById('authPassword').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') onAuthSubmit();
     });
+    document.getElementById('authEmail').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && authMode === 'reset') onAuthSubmit();
+    });
+    document.getElementById('forgotLink').addEventListener('click', () => setAuthMode('reset'));
+
+    document.getElementById('verifyContinueBtn').addEventListener('click', onVerifyContinue);
+    document.getElementById('verifyResendBtn').addEventListener('click', onResendVerification);
+    document.getElementById('verifyLogoutLink').addEventListener('click', () => signOut(auth));
+  }
+
+  // ---------- Email verification screen ----------
+
+  function showVerifyScreen(user) {
+    currentUser = user;
+    document.getElementById('appScreen').classList.add('hidden');
+    document.getElementById('userBar').classList.add('hidden');
+    document.getElementById('authScreen').classList.add('hidden');
+    document.getElementById('verifyScreen').classList.remove('hidden');
+    document.getElementById('verifyEmail').textContent = user.email;
+    document.getElementById('verifyNotice').style.display = 'none';
+    document.getElementById('verifyError').style.display = 'none';
+  }
+
+  async function onVerifyContinue() {
+    const btn = document.getElementById('verifyContinueBtn');
+    const errorEl = document.getElementById('verifyError');
+    errorEl.style.display = 'none';
+    btn.disabled = true;
+    try {
+      await reload(currentUser);
+      if (currentUser.emailVerified) {
+        showAppScreen(currentUser);
+      } else {
+        errorEl.textContent = 'Still not verified. Check your inbox (and spam folder), then try again.';
+        errorEl.style.display = 'block';
+      }
+    } catch (err) {
+      errorEl.textContent = 'Something went wrong. Please try again.';
+      errorEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function onResendVerification() {
+    const btn = document.getElementById('verifyResendBtn');
+    const noticeEl = document.getElementById('verifyNotice');
+    const errorEl = document.getElementById('verifyError');
+    errorEl.style.display = 'none';
+    btn.disabled = true;
+    try {
+      await sendEmailVerification(currentUser);
+      noticeEl.textContent = 'Verification email sent.';
+      noticeEl.style.display = 'block';
+    } catch (err) {
+      errorEl.textContent = err.code === 'auth/too-many-requests'
+        ? 'Too many attempts. Please wait a moment and try again.'
+        : 'Could not send email. Please try again.';
+      errorEl.style.display = 'block';
+    } finally {
+      setTimeout(() => { btn.disabled = false; }, 15000);
+    }
   }
 
   // ---------- Month / Year selects ----------
@@ -966,6 +1128,7 @@
 
   function showAppScreen(user) {
     currentUser = user;
+    document.getElementById('verifyScreen').classList.add('hidden');
     document.getElementById('authScreen').classList.add('hidden');
     document.getElementById('appScreen').classList.remove('hidden');
     document.getElementById('userBar').classList.remove('hidden');
@@ -983,7 +1146,9 @@
     if (unsubSpend) { unsubSpend(); unsubSpend = null; }
     document.getElementById('appScreen').classList.add('hidden');
     document.getElementById('userBar').classList.add('hidden');
+    document.getElementById('verifyScreen').classList.add('hidden');
     document.getElementById('authScreen').classList.remove('hidden');
+    setAuthMode('login');
   }
 
   // ---------- Init ----------
@@ -1029,8 +1194,12 @@
     }
 
     onAuthStateChanged(auth, (user) => {
-      if (user) showAppScreen(user);
-      else showAuthScreen();
+      if (user) {
+        if (user.emailVerified) showAppScreen(user);
+        else showVerifyScreen(user);
+      } else {
+        showAuthScreen();
+      }
     });
   }
 
