@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meal Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #EAF3FB;
+    --bg-raised: #FFFFFF;
+    --ink: #0E2438;
+    --ink-soft: #5C7A92;
+    --line: #D2E3F0;
+    --blue-deep: #0B3D63;
+    --blue: #1768AC;
+    --warn-soft: #FBEFDD;
+    --warn-line: #E7C190;
+    --teal-soft: #D7F3EE;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 380px; margin: 60px auto 0; padding: 0 16px; }
+  .card {
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px 22px;
+    box-shadow: 0 14px 32px -18px rgba(11,61,99,0.3);
+  }
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.25rem;
+    margin: 0 0 4px;
+    color: var(--blue-deep);
+  }
+  .sub { font-size: 0.86rem; color: var(--ink-soft); margin-bottom: 18px; line-height: 1.5; }
+  .field { margin-bottom: 14px; display: flex; flex-direction: column; gap: 4px; }
+  .field label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+  .field input {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+  .field input:focus { outline: 2px solid var(--blue); outline-offset: 1px; }
+  .btn {
+    width: 100%;
+    border: none;
+    background: var(--blue);
+    color: #fff;
+    border-radius: 10px;
+    padding: 11px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn:disabled { opacity: 0.6; cursor: default; }
+  .error {
+    background: var(--warn-soft);
+    border: 1px solid var(--warn-line);
+    color: #6E4915;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+    margin-bottom: 14px;
+  }
+  .success {
+    background: var(--teal-soft);
+    border: 1px solid #bfe6dd;
+    color: #0E6155;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+    margin-bottom: 14px;
+  }
+  .back { text-align: center; font-size: 0.85rem; margin-top: 16px; }
+  .back a { color: var(--blue); font-weight: 600; text-decoration: none; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="card">
+    <h2 id="title">One moment…</h2>
+    <div class="sub" id="sub">Checking your link.</div>
+
+    <div class="error hidden" id="errorBox"></div>
+    <div class="success hidden" id="successBox"></div>
+
+    <button class="btn hidden" id="confirmBtn">Confirm verification</button>
+
+    <div id="resetForm" class="hidden">
+      <div class="field">
+        <label>New password</label>
+        <input type="password" id="newPassword" placeholder="At least 6 characters">
+      </div>
+      <button class="btn" id="resetBtn">Set new password</button>
+    </div>
+
+    <div class="back hidden" id="backLink"><a href="index.html">Back to Meal Ledger</a></div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth, applyActionCode, verifyPasswordResetCode, confirmPasswordReset
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  // Same config as index.html — keep these in sync if you ever rotate keys.
+  const firebaseConfig = {
+    apiKey: "AIzaSyCsWGeHqbxvJIGbij4Mf1FGjJwsHlBvCuA",
+    authDomain: "meal-ledger-c9ded.firebaseapp.com",
+    projectId: "meal-ledger-c9ded",
+    storageBucket: "meal-ledger-c9ded.firebasestorage.app",
+    messagingSenderId: "185310591549",
+    appId: "G-83FSDP7HM2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const params = new URLSearchParams(window.location.search);
+  const mode = params.get('mode');
+  const oobCode = params.get('oobCode');
+
+  const titleEl = document.getElementById('title');
+  const subEl = document.getElementById('sub');
+  const errorBox = document.getElementById('errorBox');
+  const successBox = document.getElementById('successBox');
+  const confirmBtn = document.getElementById('confirmBtn');
+  const resetForm = document.getElementById('resetForm');
+  const newPasswordInput = document.getElementById('newPassword');
+  const resetBtn = document.getElementById('resetBtn');
+  const backLink = document.getElementById('backLink');
+
+  function showError(msg) {
+    errorBox.textContent = msg;
+    errorBox.classList.remove('hidden');
+  }
+
+  function showSuccess(msg) {
+    successBox.textContent = msg;
+    successBox.classList.remove('hidden');
+  }
+
+  async function init() {
+    if (!mode || !oobCode) {
+      titleEl.textContent = 'Invalid link';
+      subEl.textContent = 'This link is missing required information. Go back to the app and request a new one.';
+      backLink.classList.remove('hidden');
+      return;
+    }
+
+    if (mode === 'verifyEmail') {
+      // Deliberately does NOT call applyActionCode until the user clicks.
+      // This is what stops email link-scanners from silently burning the code.
+      titleEl.textContent = 'Confirm your email';
+      subEl.textContent = "Tap the button below to finish verifying your email address. (We wait for your tap on purpose — some email apps automatically open links to scan them for safety, which can use up a verification link before you click it. Requiring a real tap here avoids that.)";
+      confirmBtn.classList.remove('hidden');
+      confirmBtn.addEventListener('click', async () => {
+        confirmBtn.disabled = true;
+        try {
+          await applyActionCode(auth, oobCode);
+          titleEl.textContent = 'Email verified!';
+          subEl.textContent = '';
+          showSuccess('You can close this tab and go back to the app.');
+          confirmBtn.classList.add('hidden');
+          backLink.classList.remove('hidden');
+        } catch (err) {
+          showError('This link has expired or already been used. Go back to the app and request a new one.');
+          confirmBtn.classList.add('hidden');
+          backLink.classList.remove('hidden');
+        }
+      });
+    } else if (mode === 'resetPassword') {
+      try {
+        await verifyPasswordResetCode(auth, oobCode);
+        titleEl.textContent = 'Set a new password';
+        subEl.textContent = 'Choose a new password for your account.';
+        resetForm.classList.remove('hidden');
+        resetBtn.addEventListener('click', async () => {
+          const pw = newPasswordInput.value;
+          if (!pw || pw.length < 6) {
+            showError('Password should be at least 6 characters.');
+            return;
+          }
+          resetBtn.disabled = true;
+          try {
+            await confirmPasswordReset(auth, oobCode, pw);
+            titleEl.textContent = 'Password updated';
+            subEl.textContent = '';
+            showSuccess('You can now log in with your new password.');
+            resetForm.classList.add('hidden');
+            backLink.classList.remove('hidden');
+          } catch (err) {
+            showError('Could not update the password. The link may have expired — request a new one.');
+            resetBtn.disabled = false;
+          }
+        });
+      } catch (err) {
+        titleEl.textContent = 'Link expired';
+        subEl.textContent = 'This password reset link has expired or already been used. Go back to the app and request a new one.';
+        backLink.classList.remove('hidden');
+      }
+    } else {
+      titleEl.textContent = 'Unsupported link';
+      subEl.textContent = 'This type of link is not handled here.';
+      backLink.classList.remove('hidden');
+    }
+  }
+
+  init();
+</script>
+
+</body>
+</html>
