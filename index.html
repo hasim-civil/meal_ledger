@@ -5,212 +5,209 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Meal Ledger</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #EAF3FB;
+    --bg: #F3F4F6;
     --bg-raised: #FFFFFF;
-    --ink: #0E2438;
-    --ink-soft: #5C7A92;
-    --line: #D2E3F0;
+    --ink: #15171C;
+    --ink-soft: #6B7280;
+    --line: #E5E7EB;
 
-    --blue-deep: #0B3D63;
+    --accent: #FF6A1A;
+    --accent-soft: #FFE7D6;
+    --accent-deep: #C2490C;
+
     --blue: #1768AC;
     --blue-soft: #D9ECFB;
 
     --teal: #0E8C7F;
     --teal-soft: #D7F3EE;
 
-    --neutral: #8FA8BD;
-    --neutral-soft: #E7EFF6;
-
     --warn: #C9822C;
     --warn-soft: #FBEFDD;
     --warn-line: #E7C190;
     --warn-text: #6E4915;
 
-    --red: #E2574C;
-    --red-soft: #FBE2DF;
-
-    --yellow: #F2C94C;
-    --yellow-soft: #FCF3D7;
-
-    /* Header keeps the same brand gradient regardless of theme */
-    --header-start: #0B3D63;
-    --header-end: #1768AC;
-    --banner-bg: #0B3D63;
-
-    --radius: 12px;
+    --radius: 14px;
+    --shadow: 0 12px 28px -14px rgba(20,23,28,0.14);
   }
 
   [data-theme="dark"] {
-    --bg: #0B1622;
-    --bg-raised: #14253A;
-    --ink: #E7F1FB;
-    --ink-soft: #8FAAC2;
-    --line: #223C57;
+    --bg: #0E1014;
+    --bg-raised: #181B21;
+    --ink: #F1F3F6;
+    --ink-soft: #9AA3AF;
+    --line: #272B33;
 
-    --blue-deep: #BFE0FF;
+    --accent: #FF8A4C;
+    --accent-soft: #3A2414;
+    --accent-deep: #FFB07A;
+
     --blue: #4FA3E3;
     --blue-soft: #1B3A55;
 
     --teal: #36C7B3;
     --teal-soft: #143C38;
 
-    --neutral: #6F8CA6;
-    --neutral-soft: #1C2F44;
-
     --warn: #E3A94A;
     --warn-soft: #3A2C14;
     --warn-line: #6B4E22;
     --warn-text: #F5D9AE;
 
-    --red: #F0726A;
-    --red-soft: #3A1E1C;
-
-    --yellow: #F5D266;
-    --yellow-soft: #3A3015;
+    --shadow: 0 12px 28px -14px rgba(0,0,0,0.6);
   }
 
   * { box-sizing: border-box; }
-
-  .bg-decor {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    overflow: hidden;
-    pointer-events: none;
-  }
-
-  .bg-decor svg {
-    position: absolute;
-    opacity: 0.12;
-    transition: opacity 0.25s ease;
-  }
-
-  [data-theme="dark"] .bg-decor svg { opacity: 0.16; }
 
   body {
     margin: 0;
     background: var(--bg);
     color: var(--ink);
     font-family: 'Inter', sans-serif;
-    transition: background 0.25s ease, color 0.25s ease;
     -webkit-font-smoothing: antialiased;
+    transition: background 0.25s ease, color 0.25s ease;
   }
 
-  .app {
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 18px 16px 28px;
-    min-height: 100vh;
-  }
-
+  .app { max-width: 600px; margin: 0 auto; padding: 18px 16px 32px; min-height: 100vh; }
   .hidden { display: none !important; }
 
-  /* Hero header */
-  header.top {
-    position: relative;
-    background: linear-gradient(135deg, var(--header-start), var(--header-end));
-    color: #fff;
-    padding: 18px 20px;
-    border-radius: 16px;
-    margin-bottom: 16px;
-    box-shadow: 0 10px 24px -12px rgba(11,61,99,0.55);
-  }
-
-  h1 {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 1.45rem;
-    letter-spacing: -0.01em;
-    margin: 0;
-    color: #fff;
-  }
-
-  h1 span { color: #BFE0FF; font-style: italic; }
-
-  .by-tag {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.58rem;
-    font-weight: 600;
-    color: #BFE0FF;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    opacity: 0.85;
-    vertical-align: middle;
-    margin-left: 4px;
-    font-style: normal;
-  }
-
-  .theme-toggle {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(255,255,255,0.18);
-    color: #fff;
-    font-size: 0.92rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .top-sub {
-    font-size: 0.78rem;
-    color: #AFD3F2;
-    margin-top: 4px;
-    letter-spacing: 0.01em;
-  }
-
-  .user-bar {
+  /* ===== Top bar (new header) ===== */
+  .topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255,255,255,0.18);
+    padding: 4px 2px 20px;
   }
 
-  .user-email {
-    font-size: 0.78rem;
-    color: #DCEEFB;
+  .brand { display: flex; align-items: center; gap: 9px; }
+
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .brand-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  .brand-by {
+    font-size: 0.64rem;
+    color: var(--ink-soft);
     font-weight: 500;
+    margin-left: 2px;
+  }
+
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--bg-raised);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.92rem;
+    cursor: pointer;
+  }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px 6px 4px 4px;
+    cursor: pointer;
+  }
+
+  .avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.72rem;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .user-email {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--ink);
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .logout-btn {
-    background: rgba(255,255,255,0.16);
-    border: none;
-    color: #fff;
+    border: 1px solid var(--line);
+    background: var(--bg-raised);
+    color: var(--ink-soft);
     border-radius: 999px;
-    padding: 6px 14px;
+    padding: 6px 13px;
     font-size: 0.74rem;
     font-weight: 600;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
   }
 
-  /* Auth screen */
-  .auth-wrap { max-width: 380px; margin: 30px auto 0; }
+  /* ===== Config warning ===== */
+  .config-warning {
+    background: var(--warn-soft);
+    border: 1px solid var(--warn-line);
+    color: var(--warn-text);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .config-warning code { background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px; font-size: 0.8em; }
+
+  /* ===== Auth page ===== */
+  .auth-page { display: flex; flex-direction: column; align-items: center; padding-top: 28px; }
+
+  .auth-brand { display: flex; align-items: center; gap: 9px; margin-bottom: 22px; }
+
+  .auth-brand .brand-name { font-size: 1.3rem; }
 
   .auth-card {
     background: var(--bg-raised);
     border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 26px 22px;
-    box-shadow: 0 14px 32px -18px rgba(11,61,99,0.3);
+    border-radius: 18px;
+    padding: 28px 24px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 360px;
   }
 
   .auth-card h2 {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 1.25rem;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
     margin: 0 0 4px;
-    color: var(--blue-deep);
+    color: var(--ink);
   }
 
   .auth-sub { font-size: 0.82rem; color: var(--ink-soft); margin-bottom: 18px; }
@@ -232,18 +229,19 @@
     font-family: 'Inter', sans-serif;
     font-size: 0.92rem;
     color: var(--ink);
+    background: var(--bg-raised);
   }
 
-  .auth-field input:focus { outline: 2px solid var(--blue); outline-offset: 1px; }
+  .auth-field input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
   .auth-btn {
     width: 100%;
     border: none;
-    background: var(--blue);
+    background: var(--accent);
     color: #fff;
     border-radius: 10px;
     padding: 11px;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.92rem;
     cursor: pointer;
     margin-top: 6px;
@@ -253,7 +251,10 @@
   .auth-btn:disabled { opacity: 0.6; cursor: default; }
 
   .auth-switch { text-align: center; font-size: 0.82rem; color: var(--ink-soft); margin-top: 14px; }
-  .auth-switch a { color: var(--blue); font-weight: 600; cursor: pointer; text-decoration: none; }
+  .auth-switch a { color: var(--accent-deep); font-weight: 600; cursor: pointer; text-decoration: none; }
+
+  .auth-forgot { text-align: right; font-size: 0.78rem; margin: -6px 0 12px; }
+  .auth-forgot a { color: var(--accent-deep); cursor: pointer; text-decoration: none; font-weight: 600; }
 
   .auth-error {
     background: var(--warn-soft);
@@ -277,33 +278,11 @@
     display: none;
   }
 
-  .auth-forgot { text-align: right; font-size: 0.78rem; margin: -6px 0 12px; }
-  .auth-forgot a { color: var(--blue); cursor: pointer; text-decoration: none; font-weight: 600; }
-
-  /* Avatar + profile modal */
-  .user-bar-left { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-
-  .avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 0.82rem;
-    color: #fff;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-
-  .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
+  /* ===== Profile modal ===== */
   .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(11,36,56,0.45);
+    background: rgba(15,17,20,0.45);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -313,28 +292,28 @@
 
   .modal-card {
     background: var(--bg-raised);
-    border-radius: 16px;
-    padding: 24px 22px;
+    border-radius: 18px;
+    padding: 26px 24px;
     max-width: 360px;
     width: 100%;
-    box-shadow: 0 20px 50px -20px rgba(11,61,99,0.4);
+    box-shadow: var(--shadow);
   }
 
   .modal-card h2 {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 1.15rem;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1.12rem;
     margin: 0 0 4px;
-    color: var(--blue-deep);
+    color: var(--ink);
   }
 
   .modal-actions { display: flex; gap: 8px; margin-top: 4px; }
 
   .btn-secondary {
     flex: 1;
-    background: var(--neutral-soft);
+    background: var(--bg);
     color: var(--ink);
-    border: none;
+    border: 1px solid var(--line);
     border-radius: 10px;
     padding: 11px;
     font-weight: 600;
@@ -343,44 +322,42 @@
     font-family: 'Inter', sans-serif;
   }
 
-  /* Tabs */
+  /* ===== Segmented tabs ===== */
   .tabs {
     display: flex;
-    gap: 6px;
-    background: var(--blue-soft);
+    gap: 3px;
+    background: var(--bg-raised);
+    border: 1px solid var(--line);
     padding: 4px;
     border-radius: 999px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
   }
 
   .tab {
     flex: 1;
     border: none;
     background: transparent;
-    padding: 9px 14px;
+    padding: 10px 14px;
     border-radius: 999px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Space Grotesk', sans-serif;
     font-weight: 600;
-    font-size: 0.85rem;
-    color: var(--blue-deep);
+    font-size: 0.86rem;
+    color: var(--ink-soft);
     cursor: pointer;
     transition: background 0.18s ease, color 0.18s ease;
   }
 
-  .tab.active {
-    background: var(--blue);
-    color: #fff;
-    box-shadow: 0 2px 8px -2px rgba(23,104,172,0.5);
-  }
+  .tab.active { background: var(--line); color: var(--ink); }
 
   .panel { display: none; }
   .panel.active { display: block; }
 
-  /* Month / Year bar */
-  .month-bar { display: flex; gap: 10px; margin-bottom: 12px; }
+  /* ===== Month / Year ===== */
+  .month-bar { display: flex; gap: 10px; margin-bottom: 14px; }
 
   .field { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-  .field.year-field { flex: 0 0 110px; }
+  .field.year-field { flex: 0 0 108px; }
 
   .field-label {
     font-size: 0.64rem;
@@ -392,50 +369,50 @@
   }
 
   select.month-select {
-    font-family: 'Fraunces', serif;
+    font-family: 'Space Grotesk', sans-serif;
     font-weight: 600;
-    font-size: 0.98rem;
+    font-size: 0.95rem;
     background: var(--bg-raised);
     border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 9px 10px;
+    border-radius: 11px;
+    padding: 10px;
     color: var(--ink);
     cursor: pointer;
     width: 100%;
   }
 
-  select.month-select:focus { outline: 2px solid var(--blue); outline-offset: 1px; }
+  select.month-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-  /* Tally bar */
-  .tally { display: flex; gap: 8px; margin-bottom: 14px; }
+  /* ===== Tally row ===== */
+  .tally { display: flex; gap: 8px; margin-bottom: 16px; }
 
   .tally-card {
     flex: 1;
     background: var(--bg-raised);
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    padding: 9px 10px;
+    padding: 12px 10px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
   }
 
   .tally-icon {
-    width: 26px;
-    height: 26px;
-    border-radius: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     flex-shrink: 0;
   }
 
   .tally-icon.day { background: var(--blue-soft); color: var(--blue); }
   .tally-icon.night { background: var(--teal-soft); color: var(--teal); }
-  .tally-icon.total { background: var(--neutral-soft); color: var(--blue-deep); }
+  .tally-icon.total { background: var(--accent-soft); color: var(--accent-deep); }
 
-  .tally-num { font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.12rem; line-height: 1; }
+  .tally-num { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.12rem; line-height: 1; color: var(--ink); }
 
   .tally-label {
     font-size: 0.62rem;
@@ -445,7 +422,7 @@
     margin-top: 2px;
   }
 
-  /* Day grid */
+  /* ===== Day grid (pill section styling preserved as-is) ===== */
   .day-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
@@ -455,29 +432,26 @@
   .day-card {
     background: var(--bg-raised);
     border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 9px 10px 8px;
+    border-radius: 12px;
+    padding: 10px 10px 9px;
+    position: relative;
   }
 
-  .day-card.day-today { border-color: var(--blue); box-shadow: 0 0 0 1px var(--blue) inset; position: relative; }
+  .day-card.day-today { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
 
-  .today-badge {
+  .today-dot {
     position: absolute;
-    top: -7px;
-    right: 8px;
-    background: var(--yellow);
-    color: #5C4400;
-    font-size: 0.52rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: 2px 6px;
-    border-radius: 999px;
+    top: 9px;
+    right: 10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
   }
 
-  .day-card-head { display: flex; align-items: baseline; gap: 6px; margin-bottom: 7px; }
+  .day-card-head { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
 
-  .day-num { font-family: 'Fraunces', serif; font-weight: 700; font-size: 1rem; line-height: 1; }
+  .day-num { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.02rem; line-height: 1; color: var(--ink); }
 
   .day-dow {
     font-size: 0.6rem;
@@ -486,15 +460,15 @@
     letter-spacing: 0.03em;
   }
 
-  .day-today .day-num { color: var(--blue); }
+  .day-today .day-num { color: var(--accent-deep); }
 
   .toggles { display: flex; gap: 5px; }
 
   .pill {
     flex: 1;
-    border: 1.5px solid var(--neutral);
+    border: 1.5px solid #8FA8BD;
     background: transparent;
-    color: var(--neutral);
+    color: #8FA8BD;
     border-radius: 999px;
     padding: 5px 6px;
     font-size: 0.68rem;
@@ -509,13 +483,13 @@
   .pill.night-pill.present { background: var(--teal); border-color: var(--teal); color: #fff; }
   .pill:active { transform: scale(0.95); }
 
-  /* Market panel */
+  /* ===== Market panel ===== */
   .spend-form { display: flex; gap: 8px; margin-bottom: 16px; }
 
   .spend-form input {
     border: 1px solid var(--line);
     background: var(--bg-raised);
-    border-radius: var(--radius);
+    border-radius: 11px;
     padding: 10px 12px;
     font-family: 'Inter', sans-serif;
     font-size: 0.9rem;
@@ -527,11 +501,11 @@
 
   .btn-add {
     border: none;
-    background: var(--teal);
+    background: var(--accent);
     color: #fff;
-    border-radius: var(--radius);
+    border-radius: 11px;
     padding: 10px 18px;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.9rem;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
@@ -541,15 +515,15 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 11px 4px;
+    padding: 12px 4px;
     border-bottom: 1px solid var(--line);
   }
 
-  .spend-date { font-family: 'Fraunces', serif; font-weight: 600; font-size: 0.95rem; }
+  .spend-date { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 0.92rem; color: var(--ink); }
 
   .spend-right { display: flex; align-items: center; gap: 14px; }
 
-  .spend-amount { font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.05rem; color: var(--teal); }
+  .spend-amount { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.02rem; color: var(--ink); }
 
   .delete-btn {
     border: none;
@@ -561,7 +535,7 @@
     padding: 4px;
   }
 
-  .delete-btn:hover { color: var(--red); }
+  .delete-btn:hover { color: var(--accent-deep); }
 
   .empty-state { text-align: center; color: var(--ink-soft); font-size: 0.88rem; padding: 36px 0; }
 
@@ -570,8 +544,8 @@
     bottom: 18px;
     left: 50%;
     transform: translateX(-50%) translateY(120%);
-    background: var(--banner-bg);
-    color: #fff;
+    background: var(--ink);
+    color: var(--bg-raised);
     padding: 10px 18px;
     border-radius: 999px;
     font-size: 0.82rem;
@@ -583,116 +557,48 @@
 
   .status-banner.show { transform: translateX(-50%) translateY(0); }
 
-  .config-warning {
-    background: var(--warn-soft);
-    border: 1px solid var(--warn-line);
-    color: var(--warn-text);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    font-size: 0.85rem;
-    margin-bottom: 16px;
-    line-height: 1.5;
-  }
-
-  .config-warning code { background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px; font-size: 0.8em; }
-
   .credit {
     text-align: center;
     color: var(--ink-soft);
-    font-size: 0.76rem;
-    margin-top: 26px;
+    font-size: 0.74rem;
+    margin-top: 24px;
     padding-top: 14px;
     border-top: 1px solid var(--line);
-    letter-spacing: 0.01em;
   }
 
-  .credit .heart { color: var(--blue); padding: 0 2px; }
+  .credit .heart { color: var(--accent); padding: 0 2px; }
 
   @media (max-width: 380px) {
     .day-grid { grid-template-columns: repeat(2, 1fr); }
-    h1 { font-size: 1.25rem; }
   }
 </style>
 </head>
 <body>
 
-<div class="bg-decor" aria-hidden="true">
-  <!-- apple -->
-  <svg style="top:6%;left:5%;width:64px;transform:rotate(-14deg);" viewBox="0 0 64 64">
-    <path d="M32 22c-9 0-16 8-16 19s7 17 14 17 4-4 8 0 14-6 14-17-7-19-16-19z" fill="var(--red)"/>
-    <rect x="30" y="10" width="4" height="12" rx="2" fill="var(--red)"/>
-    <path d="M34 14c4-4 10-3 10 2s-7 6-10 2z" fill="#6FCF97"/>
-  </svg>
-
-  <!-- banana -->
-  <svg style="top:14%;right:6%;width:78px;transform:rotate(18deg);" viewBox="0 0 100 60">
-    <path d="M8 50c10 8 60 10 76-10 6-7 8-18 4-22-2 8-10 18-22 24-16 8-42 8-58 8z" fill="var(--yellow)"/>
-  </svg>
-
-  <!-- orange slice -->
-  <svg style="top:34%;left:2%;width:60px;transform:rotate(6deg);" viewBox="0 0 64 64">
-    <circle cx="32" cy="32" r="26" fill="#F2994A"/>
-    <circle cx="32" cy="32" r="20" fill="#FBE2DF"/>
-    <g stroke="#F2994A" stroke-width="2">
-      <line x1="32" y1="12" x2="32" y2="52"/>
-      <line x1="14" y1="20" x2="50" y2="44"/>
-      <line x1="14" y1="44" x2="50" y2="20"/>
-    </g>
-  </svg>
-
-  <!-- bowl of rice -->
-  <svg style="bottom:22%;right:4%;width:90px;transform:rotate(-8deg);" viewBox="0 0 100 70">
-    <path d="M10 30c0 18 18 32 40 32s40-14 40-32H10z" fill="var(--blue)"/>
-    <ellipse cx="50" cy="28" rx="42" ry="10" fill="#fff"/>
-  </svg>
-
-  <!-- chili -->
-  <svg style="bottom:10%;left:8%;width:70px;transform:rotate(-30deg);" viewBox="0 0 100 40">
-    <path d="M10 10c20-6 50-2 70 8 8 4 12 10 8 16-4 5-14 4-22 0-22-10-46-12-58-12-4 0-6-3-6-6s4-5 8-6z" fill="var(--red)"/>
-    <path d="M8 12c-4-2-8 0-8 4s4 6 8 4" fill="#6FCF97"/>
-  </svg>
-
-  <!-- leaf -->
-  <svg style="top:55%;left:48%;width:56px;transform:rotate(40deg);" viewBox="0 0 64 64">
-    <path d="M10 54C8 28 28 8 54 10c2 26-18 46-44 44z" fill="#6FCF97"/>
-    <path d="M14 50C20 36 32 24 50 16" stroke="#3FA86A" stroke-width="2" fill="none"/>
-  </svg>
-
-  <!-- fish -->
-  <svg style="top:78%;left:18%;width:74px;transform:rotate(8deg);" viewBox="0 0 100 50">
-    <ellipse cx="42" cy="25" rx="32" ry="16" fill="var(--teal)"/>
-    <path d="M74 25 96 10 96 40z" fill="var(--teal)"/>
-    <circle cx="20" cy="22" r="3" fill="#fff"/>
-  </svg>
-
-  <!-- bread -->
-  <svg style="top:4%;left:42%;width:70px;transform:rotate(-6deg);" viewBox="0 0 100 60">
-    <rect x="6" y="18" width="88" height="36" rx="18" fill="var(--yellow)"/>
-    <path d="M20 18c4-10 56-10 60 0" fill="none" stroke="#fff" stroke-width="3" opacity="0.5"/>
-  </svg>
-</div>
-
-
 <div class="app">
-  <header class="top">
-    <button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
-    <h1>Meal <span>Ledger</span> <span class="by-tag">by Hasim</span></h1>
-    <div class="top-sub">Daily attendance & market spend</div>
-    <div class="user-bar hidden" id="userBar">
-      <div class="user-bar-left" id="userBarLeft" title="Edit profile">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <span class="brand-name">Meal Ledger</span><span class="brand-by">by Hasim</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" id="themeToggle" title="Toggle dark mode">🌙</button>
+      <div class="user-chip hidden" id="userBar" title="Edit profile">
         <div class="avatar" id="userAvatar">?</div>
         <span class="user-email" id="userEmail"></span>
       </div>
-      <button class="logout-btn" id="logoutBtn">Log out</button>
+      <button class="logout-btn hidden" id="logoutBtn">Log out</button>
     </div>
-  </header>
+  </div>
 
   <div id="configWarning" class="config-warning hidden">
     Firebase isn't connected yet. Open <code>index.html</code> in a text editor and paste your Firebase config into the <code>firebaseConfig</code> object near the bottom of the script.
   </div>
 
   <!-- AUTH SCREEN -->
-  <div id="authScreen" class="auth-wrap hidden">
+  <div id="authScreen" class="auth-page hidden">
     <div class="auth-card">
       <h2 id="authTitle">Welcome back</h2>
       <div class="auth-sub" id="authSub">Log in to your meal ledger</div>
@@ -829,17 +735,16 @@
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   // ====== CONFIG ======
-  // Paste your Firebase config object below.
-  // Firebase Console > Project settings > Your apps > Web app > Config
+  // Paste your Firebase config object below (the same one from your previous
+  // version — Firebase Console > Project settings > Your apps > Web app > Config)
   const firebaseConfig = {
-  apiKey: "AIzaSyCsWGeHqbxvJIGbij4Mf1FGjJwsHlBvCuA",
-  authDomain: "meal-ledger-c9ded.firebaseapp.com",
-  projectId: "meal-ledger-c9ded",
-  storageBucket: "meal-ledger-c9ded.firebasestorage.app",
-  messagingSenderId: "185310591549",
-  appId: "1:185310591549:web:1dfad8e3a0f028c0984854",
-  measurementId: "G-83FSDP7HM2"
-};
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
   // =====================
 
   const isConfigured = firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY";
@@ -866,7 +771,7 @@
   let currentUser = null;
   let unsubAttendance = null;
   let unsubSpend = null;
-  let authMode = 'login'; // 'login' | 'signup'
+  let authMode = 'login';
 
   const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -887,7 +792,7 @@
   function showStatus(msg, isError) {
     const el = document.getElementById('statusBanner');
     el.textContent = msg;
-    el.style.background = isError ? 'var(--warn)' : 'var(--banner-bg)';
+    el.style.background = isError ? 'var(--warn)' : 'var(--ink)';
     el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 2200);
   }
@@ -974,7 +879,6 @@
       } else {
         await signInWithEmailAndPassword(auth, email, password);
       }
-      // onAuthStateChanged picks up from here
     } catch (err) {
       errorEl.textContent = AUTH_ERROR_MESSAGES[err.code] || 'Something went wrong. Please try again.';
       errorEl.style.display = 'block';
@@ -1091,11 +995,11 @@
       if (rec.day) dayCount++;
       if (rec.night) nightCount++;
 
-      const card = document.createElement('div');
-      card.className = 'day-card' + (dateStr === todayStr ? ' day-today' : '');
       const isToday = dateStr === todayStr;
+      const card = document.createElement('div');
+      card.className = 'day-card' + (isToday ? ' day-today' : '');
       card.innerHTML = `
-        ${isToday ? '<div class="today-badge">Today</div>' : ''}
+        ${isToday ? '<div class="today-dot"></div>' : ''}
         <div class="day-card-head">
           <div class="day-num">${pad(d)}</div>
           <div class="day-dow">${DOW[dateObj.getDay()]}</div>
@@ -1132,7 +1036,6 @@
 
     try {
       await setDoc(doc(db, 'users', currentUser.uid, 'attendance', date), updated, { merge: true });
-      // onSnapshot listener updates the UI automatically — no manual re-render needed
     } catch (err) {
       showStatus('Save failed — check connection', true);
     }
@@ -1255,7 +1158,7 @@
     });
   }
 
-  // ---------- Auth state ----------
+  // ---------- Profile ----------
 
   function renderUserBar(user) {
     document.getElementById('userEmail').textContent = user.displayName || user.email;
@@ -1296,11 +1199,14 @@
     }
   }
 
+  // ---------- Auth state ----------
+
   function showAppScreen(user) {
     currentUser = user;
     document.getElementById('authScreen').classList.add('hidden');
     document.getElementById('appScreen').classList.remove('hidden');
     document.getElementById('userBar').classList.remove('hidden');
+    document.getElementById('logoutBtn').classList.remove('hidden');
     renderUserBar(user);
 
     state.attendanceMonth = null;
@@ -1315,6 +1221,7 @@
     if (unsubSpend) { unsubSpend(); unsubSpend = null; }
     document.getElementById('appScreen').classList.add('hidden');
     document.getElementById('userBar').classList.add('hidden');
+    document.getElementById('logoutBtn').classList.add('hidden');
     document.getElementById('authScreen').classList.remove('hidden');
   }
 
@@ -1374,7 +1281,7 @@
     document.getElementById('addSpendBtn').addEventListener('click', onAddSpend);
     document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
 
-    document.getElementById('userBarLeft').addEventListener('click', openProfileModal);
+    document.getElementById('userBar').addEventListener('click', openProfileModal);
     document.getElementById('profileCancelBtn').addEventListener('click', closeProfileModal);
     document.getElementById('profileSaveBtn').addEventListener('click', onSaveProfile);
     document.getElementById('profileModal').addEventListener('click', (e) => {
@@ -1382,7 +1289,6 @@
     });
 
     if (!isConfigured) {
-      // Show the app shell without auth so the warning is visible, but nothing will save.
       document.getElementById('authScreen').classList.remove('hidden');
       return;
     }
